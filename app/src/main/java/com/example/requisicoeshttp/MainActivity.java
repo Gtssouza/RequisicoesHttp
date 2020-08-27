@@ -8,8 +8,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -46,23 +48,41 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... strings) {
             String stringUrl = strings[0];
+            InputStream inputStream = null;
+            InputStreamReader inputStreamReader = null;
+            StringBuffer buffer = null;//Armazena as linha q estão dentro do reader
             //criando conexão com API
             try {
                 URL url = new URL(stringUrl);
                 HttpURLConnection conexao = (HttpURLConnection) url.openConnection();
 
-                InputStream inputStream = conexao.getInputStream();
+                //Recupera os dados em Bytes
+                inputStream = conexao.getInputStream();
+                //inputStreamReader le os dados em Bytes e decodifica para caracteres
+                inputStreamReader = new InputStreamReader(inputStream);
+                //Objeto utilizado para leitura dos caracteres do InputStreamReader
+                BufferedReader reader = new BufferedReader(inputStreamReader);
+                //le linha a linha do InputStreamReader
+                buffer = new StringBuffer();
+                String linha = "";
+                //Enquanto existir linhas vai ser lido
+                while ((linha = reader.readLine()) != null){
+                    buffer.append(linha);
+                }
+
+
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return null;
+            return buffer.toString();
         }
 
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+            txtResultado.setText(s);
         }
     }
 }
